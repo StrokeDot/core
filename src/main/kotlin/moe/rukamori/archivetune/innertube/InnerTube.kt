@@ -578,19 +578,19 @@ class InnerTube {
 
     suspend fun getSwJsData() = withRetry { httpClient.get("https://music.youtube.com/sw.js_data") }
 
-    suspend fun accountMenu(client: YouTubeClient) =
+    suspend fun accountMenu(client: YouTubeClient, auth: PlaybackAuthState = currentAuthState()) =
         withRetry {
             httpClient.post("account/account_menu") {
-                ytClient(client, setLogin = true)
-                setBody(AccountMenuBody(client.toContext(locale, visitorData, dataSyncId)))
+                ytClient(client, setLogin = true, authState = auth)
+                setBody(AccountMenuBody(client.toContext(locale, auth.visitorData, auth.dataSyncId)))
             }
         }
 
-    suspend fun accountChannels(client: YouTubeClient) =
+    suspend fun accountChannels(client: YouTubeClient, auth: PlaybackAuthState = currentAuthState()) =
         withRetry {
             httpClient.post("account/accounts_list") {
-                ytClient(client, setLogin = true)
-                setBody(AccountsListBody(client.toContext(locale, visitorData, dataSyncId)))
+                ytClient(client, setLogin = true, authState = auth)
+                setBody(AccountsListBody(client.toContext(locale, auth.visitorData, auth.dataSyncId)))
             }
         }
 
