@@ -2748,14 +2748,18 @@ object YouTube {
                     innerTube.accountChannels(accountSwitcherClient).bodyAsText(),
                 )
 
-            val activeDataSyncId = response.findMainAppWebDataSyncId() ?: authState.dataSyncId
-            response
-                .objectsNamed("accountItemRenderer")
-                .mapNotNull { parseAccountChannel(it, activeDataSyncId) }
-                .sortedByDescending(AccountChannel::isSelected)
-                .distinctBy(AccountChannel::dataSyncId)
-                .toList()
+            parseAccountChannels(response, authState.dataSyncId)
         }
+
+    internal fun parseAccountChannels(response: JsonElement, storedDataSyncId: String?): List<AccountChannel> {
+        val activeDataSyncId = response.findMainAppWebDataSyncId() ?: storedDataSyncId
+        return response
+            .objectsNamed("accountItemRenderer")
+            .mapNotNull { parseAccountChannel(it, activeDataSyncId) }
+            .sortedByDescending(AccountChannel::isSelected)
+            .distinctBy(AccountChannel::dataSyncId)
+            .toList()
+    }
 
     suspend fun accountDataSyncId(auth: PlaybackAuthState = authState): Result<String> =
         runCatching {
@@ -2868,6 +2872,7 @@ object YouTube {
     private fun JsonElement.findDelegationValue(): String? {
         val directKeys =
             setOf(
+                "dataSyncId",
                 "onBehalfOfUser",
                 "obfuscatedSelectedGaiaId",
                 "obfuscatedGaiaId",
